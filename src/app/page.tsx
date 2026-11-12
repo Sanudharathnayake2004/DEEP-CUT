@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 
 type Album = {
   id: string;
@@ -23,8 +23,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [rating, setRating] = useState("");
+  const [review, setReview] = useState("");
 
-  async function handleSearch(event: FormEvent<HTMLFormElement>) {
+  async function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const searchTerm = query.trim();
@@ -121,19 +124,79 @@ export default function Home() {
                 .join("");
 
               return (
-                <article
-                  key={album.id}
-                  className="border border-black p-5"
-                >
-                  <h2 className="text-2xl font-bold">{album.title}</h2>
-                  <p className="mt-2 font-mono text-sm">
-                    {artist || "Artist unknown"}
-                    {" · "}
-                    {album["first-release-date"]?.slice(0, 4) || "Year unknown"}
-                  </p>
+                <article key={album.id}>
+                  <button
+
+                    type="button"
+                    onClick={() => setSelectedAlbum(album)}
+                    className={`border border-black p-5 text-left transition-colors hover:bg-black hover:text-[#e9e9e6] ${selectedAlbum?.id === album.id ? "bg-black text-[#e9e9e6]" : ""
+                      }`}
+                  >
+                    <h2 className="text-2xl font-bold">{album.title}</h2>
+                    <p className="mt-2 font-mono text-sm">
+                      {artist || "Artist unknown"}
+                      {" · "}
+                      {album["first-release-date"]?.slice(0, 4) || "Year unknown"}
+                    </p>
+                  </button>
                 </article>
               );
             })}
+          </div>
+        )}
+
+        {selectedAlbum && (
+          <div className="mt-10 max-w-2xl border border-black p-6">
+            <p className="font-mono text-xs tracking-[0.2em]">READY TO LOG</p>
+            <h2 className="mt-4 text-3xl font-bold">{selectedAlbum.title}</h2>
+            <p className="mt-2 font-mono text-sm">
+              {selectedAlbum["artist-credit"]
+                ?.map((credit) => `${credit.name}${credit.joinphrase ?? ""}`)
+                .join("") || "Artist unknown"}
+              {" · "}
+              {selectedAlbum["first-release-date"]?.slice(0, 4) || "Year unknown"}
+            </p>
+
+            <div className="mt-8 grid gap-5">
+              <div>
+                <label
+                  htmlFor="album-rating"
+                  className="mb-2 block font-mono text-xs tracking-[0.2em]"
+                >
+                  YOUR RATING
+                </label>
+                <select
+                  id="album-rating"
+                  value={rating}
+                  onChange={(event) => setRating(event.target.value)}
+                  className="w-full border border-black bg-transparent px-4 py-3"
+                >
+                  <option value="">Choose a rating</option>
+                  <option value="1">1 / 5</option>
+                  <option value="2">2 / 5</option>
+                  <option value="3">3 / 5</option>
+                  <option value="4">4 / 5</option>
+                  <option value="5">5 / 5</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="album-review"
+                  className="mb-2 block font-mono text-xs tracking-[0.2em]"
+                >
+                  YOUR REVIEW
+                </label>
+                <textarea
+                  id="album-review"
+                  value={review}
+                  onChange={(event) => setReview(event.target.value)}
+                  placeholder="What stayed with you from this album?"
+                  rows={5}
+                  className="w-full resize-y border border-black bg-transparent px-4 py-3"
+                />
+              </div>
+            </div>
           </div>
         )}
       </section>
